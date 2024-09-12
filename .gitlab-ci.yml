@@ -1,0 +1,22 @@
+stages: 
+  - build
+  - deploy
+
+create-image: 
+  stage: build
+  tags: 
+    - gcp
+  script: 
+    - docker build -t joaocaragmail/gcp-runner:1.0 app/.
+    - docker push joaocaragmail/gcp-runner:1.0
+
+exec-image:
+  stage: deploy
+  needs: 
+    - create-image
+  tags:
+    - gcp
+  script:
+    - docker rm -f webserver || true
+    - docker run -dti --name webserver -p 80:80 joaocaragmail/gcp-runner:1.0
+
